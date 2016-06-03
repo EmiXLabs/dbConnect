@@ -53,7 +53,7 @@ class DBConnect:
         else:
             self.settings = json.load(open(credentials_file, 'r'))
             if 'port' not in self.settings:
-                self.settings['port'] = 3306
+                self.settings['port'] = port
         self._check_settings(self)
         self.connection = None
         self.cursor = None
