@@ -18,9 +18,9 @@ class DBConnect:
         Check configuration file
         :return: True if all settings are correct
         """
-        keys = ['host', 'user', 'password', 'database', 'port']
+        keys = ['host', 'user', 'password', 'database']
         if not all(key in self.settings.keys() for key in keys):
-            raise ValueError('Please check credentials file for correct keys: host, user, password, database, port')
+            raise ValueError('Please check credentials file for correct keys: host, user, password, database')
 
     def connect(self):
         """
@@ -28,13 +28,7 @@ class DBConnect:
         Connection to database can be loosed, if that happens you can use this function to reconnect to database
         """
         try:
-            self.connection = mysql.connector.connect(
-                user=self.settings['user'],
-                password=self.settings['password'],
-                host=self.settings['host'],
-                database=self.settings['database'],
-                charset='utf8',
-                port=self.settings['port'])
+            self.connection = mysql.connector.connect(**self.settings)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 raise ValueError("Wrong credentials, ACCESS DENIED")
@@ -44,22 +38,26 @@ class DBConnect:
                 raise ValueError(err)
         self.cursor = self.connection.cursor()
 
-    def __init__(self, credentials_file='credentials.json', host=None, user=None,
-                 password=None, database=None, port=3306):
+    def __init__(self, credentials_file=None, charset='utf8',
+                 port=3306, **kwargs):
         """
         Initialise object with credentials file provided
         You can choose between providing file or connection details
+        Available parameters: https://dev.mysql.com/doc/connector-python/en/connector-python-connectargs.html
         """
-        if host and user and password and database:
-            self.settings = {"host": host, "user": user, "password": password, "database": database, "port": port}
-        else:
+        if credentials_file:
             with open(credentials_file, 'r') as f:
                 self.settings = json.load(f)
             if 'port' not in self.settings:
                 self.settings['port'] = port
+            if 'charset' not in self.settings:
+                self.settings['charset'] = charset
+        # Merge with kwargs
+        self.settings = {**self.settings, **kwargs}
         self._check_settings()
         self.connection = None
         self.cursor = None
+        # Establish connection and set cursor
         self.connect()
 
     def disconnect(self):
