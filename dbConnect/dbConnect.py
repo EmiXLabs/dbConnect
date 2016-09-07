@@ -53,7 +53,7 @@ class DBConnect:
             if 'charset' not in self.settings:
                 self.settings['charset'] = charset
         # Merge with kwargs
-        self.settings = {**self.settings, **kwargs}
+        self.settings.update(**kwargs)
         self._check_settings()
         self.connection = None
         self.cursor = None
