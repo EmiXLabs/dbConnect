@@ -126,7 +126,7 @@ Increment provided columns.
 
 Fields:
 	- table: ``str`` : name of table, must be provided
-	- columns: ``array`` : column names to increment, must be provided
+	- fields: ``array`` : list of column names to increment, required
 	- steps: ``int`` : Steps to increment, must be provided
 	- filters: ``dict`` : filters to find row(s)
 	- case: ``str`` : search case for filter [AND, OR], default ``'AND'``
@@ -135,6 +135,22 @@ Fields:
 Example:
 
 	>>> database.increment('user', ['views'], steps=2, filters={'id': 1})
+
+
+	SUM
+	-----------------
+
+	Total sum of a numeric column(s).
+
+	Fields:
+		- table: ``str`` : name of table, must be provided
+		- fields: ``array`` : list of numeric column names, required
+		- filters: ``dict`` : filters to find row(s)
+		- case: ``str`` : search case for filter [AND, OR], default ``'AND'``
+
+	Example:
+
+		>>> database.value_sum('user', fields=['views'])
 
 
 Custom SQL Query

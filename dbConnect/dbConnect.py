@@ -283,12 +283,12 @@ class DBConnect:
         if commit:
             self.commit()
 
-    def increment(self, table, columns, steps=1, filters=None,
+    def increment(self, table, fields, steps=1, filters=None,
                   case="AND", commit=True):
         """
         Increment column in table
         :param table: str table name
-        :param columns: list column names to increment
+        :param fields: list column names to increment
         :param steps: int steps to increment, default is 1
         :param filters: dict filters for rows to use
         :param case: Search case, Should be 'AND' or 'OR'
@@ -316,6 +316,41 @@ class DBConnect:
         if commit:
             self.commit()
         return {'status': True, 'message': "Columns incremented"}
+
+    def value_sum(self, table, fields, filters=None, case='AND'):
+        """
+        Get total sum of a numeric column(s)
+        :param table: name of the table
+        :type table: str
+        :param fields: fields to get sum of
+        :type fields: list
+        :param filters: filters to get custom results (where)
+        :type filters: dict
+        :param case: [AND, OR] for filter type
+        :type case: str
+        :return: dict with column name and value as Decimal
+        """
+        query = 'SELECT '
+        for field in fields:
+            query += 'SUM(' + field + '), '
+        query = query.rstrip(', ') + ' FROM ' + str(table)
+        data = None
+        if filters:
+            data = {}
+            query += ' WHERE '
+            update_query, where_data = self._where_builder(filters, case)
+            query += update_query
+            for key in where_data:
+                data['where_' + key] = where_data[key]
+        if data:
+            self.cursor.execute(query, data)
+        else:
+            self.cursor.execute(query)
+        row = self.cursor.fetchone()
+        result = {}
+        for i in range(len(row)):
+            result[fields[i]] = row[i]
+        return result
 
     def commit(self):
         """
