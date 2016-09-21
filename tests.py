@@ -13,7 +13,7 @@ USERS = [
 class dbTest(TestCase):
     def setUp(self):
         """Prepare for Test."""
-        self.database = DBConnect('test_credentials.json')
+        self.database = DBConnect('travis_credentials.json')
 
     def tearDown(self):
         """Finish Testing."""

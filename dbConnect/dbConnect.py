@@ -295,10 +295,12 @@ class DBConnect:
         :param commit: Commit at the end or add to pool
         :note: If you use safe update mode, filters should be provided
         """
-        if not columns:
-            raise ValueError("You must provide which columns to update")
+        if not fields:
+            raise ValueError(
+                "You must provide which columns (fields) to update"
+            )
         query = "UPDATE %s SET " % str(table)
-        for column in columns:
+        for column in fields:
             query += "{column} = {column} + {steps}, ".format(
                     column=column, steps=steps)
         query = query.rstrip(', ')
