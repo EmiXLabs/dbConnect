@@ -2,13 +2,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import json
-try:
-    import mysql.connector  # MySQL Connector
-    from mysql.connector import errorcode
-except:
-    raise ValueError(
-        'Please, install mysql-connector module before using plugin.'
-    )
 
 
 class DBConnect:
@@ -20,12 +13,17 @@ class DBConnect:
         Check configuration file
         :return: True if all settings are correct
         """
-        keys = ['host', 'user', 'password', 'database']
+        keys = ['host', 'user', 'password']
         if not all(key in self.settings.keys() for key in keys):
             raise ValueError(
                 'Please check credentials file for correct keys: host, user, '
                 'password, database'
             )
+        if self.engine == "mysql" and 'database' not in self.settings.keys():
+            raise ValueError(
+                'database parameter is missing in credentials'
+            )
+        # @NOTE PostgreSQL uses dbname and is automatically set to username
 
     def connect(self):
         """
@@ -33,21 +31,41 @@ class DBConnect:
         Connection to database can be loosed,
           if that happens you can use this function to reconnect to database
         """
-        try:
-            self.connection = mysql.connector.connect(**self.settings)
-        except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                raise ValueError("Wrong credentials, ACCESS DENIED")
-            elif err.errno == errorcode.ER_BAD_DB_ERROR:
+        if self.engine == "mysql":
+            try:
+                import mysql.connector  # MySQL Connector
+                from mysql.connector import errorcode
+                self.connection = mysql.connector.connect(**self.settings)
+            except ImportError:
                 raise ValueError(
-                    "Database %s does not exists" % (self.settings['database'])
+                    'Please, install mysql-connector module before using plugin.'
                 )
-            else:
-                raise ValueError(err)
+            except mysql.connector.Error as err:
+                if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                    raise ValueError("Wrong credentials, ACCESS DENIED")
+                elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                    raise ValueError(
+                        "Database %s does not exists" % (self.settings['database'])
+                    )
+                else:
+                    raise ValueError(err)
+        elif self.engine == "postgres":
+            try:
+                import psycopg2
+            except ImportError:
+                raise ValueError(
+                    'Please, install psycopg2 module before using plugin.'
+                )
+            self.connection = psycopg2.connect(**self.settings)
+        else:
+            raise NotImplementedError(
+                "Database engine %s not implemented!" % self.engine
+            )
+
         self.cursor = self.connection.cursor()
 
     def __init__(self, credentials_file=None, charset='utf8',
-                 port=3306, **kwargs):
+                 port=3306, engine="mysql", **kwargs):
         """
         Initialise object with credentials file provided
         You can choose between providing file or connection details
@@ -63,6 +81,10 @@ class DBConnect:
                 self.settings['charset'] = charset
         # Merge with kwargs
         self.settings.update(**kwargs)
+        self.engine = self.settings.pop('engine', engine)
+        # @NOTE Charset parameter not supported in PostgreSQL
+        if self.engine == 'postgres':
+            self.settings.pop('charset', None)
         self._check_settings()
         self.connection = None
         self.cursor = None
@@ -197,14 +219,30 @@ class DBConnect:
             query = query_insert + query_value
             if update and bool(update):
                 # bool(dict) checks if dict is not empty
-                query += ' ON DUPLICATE KEY UPDATE '
-                for key in update:
-                    query += key + ' = '
-                    if isinstance(update[key], int):
-                        query += update[key] + ', '
-                    else:
-                        query += '"' + update[key] + '", '
-                query = query.rstrip(', ')
+                if self.engine == "mysql":
+                    query += ' ON DUPLICATE KEY UPDATE '
+                    for key in update:
+                        query += key + ' = '
+                        if isinstance(update[key], int):
+                            query += update[key] + ', '
+                        else:
+                            query += '"' + update[key] + '", '
+                    query = query.rstrip(', ')
+                elif self.engine == "postgres":
+                    query += ' ON CONFLICT ON CONSTRAINT '
+                    query += table + '_pkey'
+                    query += ' DO UPDATE SET '
+                    for key in update:
+                        query = key + ' = '
+                        if isinstance(update[key], int):
+                            query += update[key] + ', '
+                        else:
+                            query += '"' + update[key] + '", '
+                    query = query.rstrip(', ')
+                else:
+                    raise NotImplementedError(
+                        "Update on insert not implemented for choosen engine"
+                    )
             # Format, execute and send to database:
             self.cursor.execute(query, data)
             if commit:
