@@ -7,3 +7,4 @@ dist/
 docs/_build/
 NOTES.md
 test_credentials.json
+test_pg_credentials.json

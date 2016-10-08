@@ -28,11 +28,16 @@ Or provide database details:
 
 	>>> database = DBConnect(host='127.0.0.1', user='root', password='', database='test')
 
-You can provide any other parameters that are available in `mysql.connector <https://dev.mysql.com/doc/connector-python/en/connector-python-connectargs.html>`_
+You can provide any other parameters that are available in `mysql.connector <https://dev.mysql.com/doc/connector-python/en/connector-python-connectargs.html>`_ or `PostgreSQL Documentation <https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-PARAMKEYWORDS>`_
 
 * After successfull connection there will be **database.connection** and
-**database.cursor** variables that can be used as in official MySQL
-documentation.
+**database.cursor** variables that can be used as in official MySQL or PostgreSQL documentation.
+
+
+Engines
+-------
+
+dbConnect supports `mysql` and `postgres` as `engine` options.
 
 
 Fetch Data

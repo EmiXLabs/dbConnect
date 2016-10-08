@@ -1,4 +1,4 @@
-dbConnect: MySQL for Humans
+dbConnect: Database for Humans
 ===========================
 .. image:: https://readthedocs.org/projects/dbconnect/badge/?version=latest
   :target: http://dbconnect.readthedocs.org/?badge=latest
@@ -9,11 +9,22 @@ dbConnect: MySQL for Humans
    :target: https://landscape.io/github/mastizada/dbConnect/master
    :alt: Code Health
 
+
+WHY?
+====
+
+dbConnect was made as little module to be used in small projects
+that need to do some interactions with MySQL or PostgreSQL databases.
+
+It's just a big time saver for developers and helps to keep your
+code clean and readable.
+
+
 Installation
 =============
 requirements:
 ^^^^^^^^^^^^^
-dbConnect uses mysql.connector module, install it using:
+dbConnect uses mysql.connector module for mysql, install it using:
 
 .. code-block:: bash
 
@@ -21,6 +32,12 @@ dbConnect uses mysql.connector module, install it using:
   $ apt-get install python-mysql.connector
 
 Or using offical site: `https://dev.mysql.com/downloads/connector/python/`
+
+For PostgreSQL install psycopg2 module:
+
+.. code-block:: bash
+
+  $ pip install psycopg2
 
 using pip:
 ^^^^^^^^^^
