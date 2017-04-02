@@ -5,9 +5,8 @@ import json
 
 
 class DBConnect:
-    """
-    Light database connection object
-    """
+    """Light database connection object."""
+    settings = {}
     def _check_settings(self):
         """
         Check configuration file
