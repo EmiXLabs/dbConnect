@@ -5,7 +5,7 @@ with open('README.rst', 'r') as f:
 
 setup(
     name='dbConnect',
-    version='1.6.0',
+    version='2.0',
     description='Database for Humans',
     long_description=readme,
     keywords='dbConnect, mysql, postgresql, postgres, simple, easy, light, module',
@@ -30,6 +30,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Database :: Front-Ends',
